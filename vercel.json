@@ -1,5 +1,6 @@
 {
-  "git": {
-    "deploymentEnabled": false
-  }
+  "buildCommand": "pnpm --filter='@webstudio-is/builder^...' build && pnpm --filter='@webstudio-is/builder' build",
+  "outputDirectory": "apps/builder/build",
+  "framework": "remix",
+  "installCommand": "pnpm install"
 }
