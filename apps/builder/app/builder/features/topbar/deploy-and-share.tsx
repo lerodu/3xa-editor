@@ -86,15 +86,18 @@ export const DeployAndShareButton = ({ projectId }: DeployAndShareProps) => {
         name: "Auto-generated share link",
       });
 
-      if (!shareResult) {
+      if (!shareResult || !shareResult[0]) {
         toast.error("Failed to create share URL");
         return;
       }
 
+      // Use environment variable for testing, fallback to current origin
+      const origin = process.env.WEBSTUDIO_API_ORIGIN || window.location.origin;
+
       const shareUrl = builderUrl({
         projectId,
-        origin: window.location.origin,
-        authToken: shareResult.token,
+        origin: origin,
+        authToken: shareResult[0].token,
         mode: "preview",
       });
 
