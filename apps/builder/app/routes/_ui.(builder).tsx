@@ -198,14 +198,11 @@ export const loader = async (loaderArgs: LoaderFunctionArgs) => {
       );
     }
 
-    headers.set(
-      // Disallowing iframes from loading any content except the canvas
-      // Still possible create iframes on canvas itself (but we use credentialless attribute)
-      // Still possible create iframe without src attribute
-      // Disable workers on builder
-      "Content-Security-Policy",
-      `frame-src ${url.origin}/canvas https://app.goentri.com/ https://help.webstudio.is/; worker-src 'none'`
-    );
+    // Set CSP header only if not null or empty
+    const cspPolicy = `frame-src ${url.origin}/canvas https://app.goentri.com/ https://help.webstudio.is/; worker-src 'none'`;
+    if (cspPolicy && cspPolicy !== "null") {
+      headers.set("Content-Security-Policy", cspPolicy);
+    }
 
     return json(
       {
@@ -242,10 +239,17 @@ export const loader = async (loaderArgs: LoaderFunctionArgs) => {
  *
  */
 export const headers = ({ loaderHeaders }: HeadersArgs) => {
-  return {
+  const cspHeader = loaderHeaders.get("Content-Security-Policy");
+  const headers: Record<string, string> = {
     "Cache-Control": "no-store",
-    "Content-Security-Policy": loaderHeaders.get("Content-Security-Policy"),
   };
+
+  // Only set CSP header if it's not null or empty
+  if (cspHeader && cspHeader !== "null" && cspHeader.trim() !== "") {
+    headers["Content-Security-Policy"] = cspHeader;
+  }
+
+  return headers;
 };
 
 const Builder = lazy(async () => {
