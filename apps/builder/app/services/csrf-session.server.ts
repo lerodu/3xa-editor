@@ -24,18 +24,27 @@ const getCsrfSessionCookieNameVersion = () => {
 
 const csrfSessionStorage = createCookieSessionStorage({
   cookie: {
-    // Using the __Host- prefix to prevent a malicious user from setting another person's session cookie
-    // on all subdomains of apps.webstudio.is, e.g., setting Domain=.apps.webstudio.is.
-    // For more information, see: https://developer.mozilla.org/en-US/docs/Web/Security/Practical_implementation_guides/Cookies#name
-    name: `__Host-_csrf_${getCsrfSessionCookieNameVersion()}`,
+    // Use __Host- prefix only in production, fallback to regular name in development/preview
+    name:
+      env.DEPLOYMENT_ENVIRONMENT === "production"
+        ? `__Host-_csrf_${getCsrfSessionCookieNameVersion()}`
+        : `_csrf_${getCsrfSessionCookieNameVersion()}`,
     sameSite: "lax",
     path: "/",
     httpOnly: true,
     secrets: env.AUTH_WS_CLIENT_SECRET
       ? [env.AUTH_WS_CLIENT_SECRET]
       : undefined,
-    secure: true,
+    secure: env.DEPLOYMENT_ENVIRONMENT === "production",
   },
+});
+
+// Debug session storage configuration
+console.log("🔍 Debug CSRF - Session storage config:", {
+  cookieName: `__Host-_csrf_${getCsrfSessionCookieNameVersion()}`,
+  hasSecret: !!env.AUTH_WS_CLIENT_SECRET,
+  secretLength: env.AUTH_WS_CLIENT_SECRET?.length,
+  deploymentEnv: env.DEPLOYMENT_ENVIRONMENT,
 });
 
 const toBase64Url = (buffer: ArrayBuffer) => {
@@ -67,14 +76,18 @@ export const getCsrfTokenAndCookie = async (
   request: Request
 ): Promise<[csrfToken: string, setCookieValue: string | undefined]> => {
   const hash = await getRequestAuthHash(request);
+  console.log("🔍 Debug CSRF - Hash:", hash);
 
   const csrfSession = await csrfSessionStorage.getSession(
     request.headers.get("Cookie")
   );
+  console.log("🔍 Debug CSRF - Session hash:", csrfSession.get("hash"));
+  console.log("🔍 Debug CSRF - Session token:", csrfSession.get("token"));
 
   let sessionCreateCookieValue: string | undefined = undefined;
 
   if (csrfSession.get("hash") !== hash) {
+    console.log("🔍 Debug CSRF - Creating new token");
     const csrfTokenLength = 16;
     const array = new Uint8Array(csrfTokenLength);
     crypto.getRandomValues(array);
@@ -84,9 +97,12 @@ export const getCsrfTokenAndCookie = async (
     csrfSession.set("token", token);
     sessionCreateCookieValue =
       await csrfSessionStorage.commitSession(csrfSession);
+    console.log("🔍 Debug CSRF - New token created:", token);
   }
 
-  return [csrfSession.get("token"), sessionCreateCookieValue];
+  const finalToken = csrfSession.get("token");
+  console.log("🔍 Debug CSRF - Final token:", finalToken);
+  return [finalToken, sessionCreateCookieValue];
 };
 
 export const checkCsrf = async (request: Request) => {
