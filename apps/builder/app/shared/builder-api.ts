@@ -42,11 +42,15 @@ const isInTop = () => {
 const getTopApi = () => {
   if (isInTop()) {
     // Inside the iframe, use the local window.api
+    console.log("🔍 Debug: Using local builder API");
     return _builderApi;
   } else {
     // Find first iframe with the API
+    console.log("🔍 Debug: Looking for top window API");
     invariant(window.top);
-    return window.top[apiWindowNamespace];
+    const topApi = window.top[apiWindowNamespace];
+    console.log("🔍 Debug: Top API found:", !!topApi);
+    return topApi;
   }
 };
 

@@ -81,6 +81,7 @@ export const clientLoader = async ({
 
   if (clientCsrfToken === undefined) {
     const { csrfToken } = serverData;
+    console.log("🔍 Debug CSRF token:", csrfToken);
     invariant(csrfToken !== "", "CSRF token is empty");
     updateCsrfToken(csrfToken);
   }

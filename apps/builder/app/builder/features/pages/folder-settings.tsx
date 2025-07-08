@@ -530,6 +530,7 @@ const DeleteConfirmationDialog = ({
       }}
     >
       <DialogContent>
+        <DialogTitle>Delete confirmation</DialogTitle>
         <Flex gap="3" direction="column" css={{ padding: theme.panel.padding }}>
           <Text>{`Delete folder "${folder.name}" including all of its pages?`}</Text>
           <Flex direction="rowReverse" gap="2">
@@ -548,7 +549,6 @@ const DeleteConfirmationDialog = ({
             </DialogClose>
           </Flex>
         </Flex>
-        <DialogTitle>Delete confirmation</DialogTitle>
       </DialogContent>
     </Dialog>
   );

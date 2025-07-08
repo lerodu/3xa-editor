@@ -518,6 +518,7 @@ const DeleteConfirmationDialog = ({
       }}
     >
       <DialogContent>
+        <DialogTitle>Delete confirmation</DialogTitle>
         <Flex gap="3" direction="column" css={{ padding: theme.panel.padding }}>
           <Text>{`Delete "${token}" token from the project including all of its styles?`}</Text>
           <Flex direction="rowReverse" gap="2">
@@ -536,7 +537,6 @@ const DeleteConfirmationDialog = ({
             </DialogClose>
           </Flex>
         </Flex>
-        <DialogTitle>Delete confirmation</DialogTitle>
       </DialogContent>
     </Dialog>
   );
