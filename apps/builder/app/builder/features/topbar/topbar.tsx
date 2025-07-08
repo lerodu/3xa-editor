@@ -16,6 +16,7 @@ import { $editingPageId, $pages } from "~/shared/nano-states";
 
 import { ShareButton } from "./share";
 import { PublishButton } from "./publish";
+import { DeployAndShareButton } from "./deploy-and-share";
 import { SyncStatus } from "./sync-status";
 import { Menu } from "./menu";
 import {
@@ -126,6 +127,7 @@ export const Topbar = ({ project, hasProPlan, css, loading }: TopbarProps) => {
 
           <BuilderModeDropDown />
           <ShareButton projectId={project.id} hasProPlan={hasProPlan} />
+          <DeployAndShareButton projectId={project.id} />
           <PublishButton projectId={project.id} />
           <CloneButton />
         </ToolbarToggleGroup>

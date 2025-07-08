@@ -82,6 +82,10 @@ const env = {
   // Used for project oauth login flow @todo remove ??
   AUTH_WS_CLIENT_ID: process.env.AUTH_WS_CLIENT_ID ?? "12345",
   AUTH_WS_CLIENT_SECRET: process.env.AUTH_WS_CLIENT_SECRET ?? "12345678",
+
+  // GitHub Action configuration
+  GITHUB_ACTION_TOKEN: process.env.GITHUB_ACTION_TOKEN,
+  GITHUB_REPOSITORY: process.env.GITHUB_REPOSITORY,
 };
 
 export type ServerEnv = typeof env;
