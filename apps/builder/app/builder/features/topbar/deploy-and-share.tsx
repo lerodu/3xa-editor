@@ -25,7 +25,7 @@ import {
   AlertIcon,
 } from "@webstudio-is/icons";
 import { nativeClient } from "~/shared/trpc/trpc-client";
-import { $authTokenPermissions } from "~/shared/nano-states";
+import { $authTokenPermissions, $project } from "~/shared/nano-states";
 import { builderUrl } from "~/shared/router-utils";
 
 type DeployAndShareProps = {
@@ -42,6 +42,7 @@ export const DeployAndShareButton = ({ projectId }: DeployAndShareProps) => {
   );
 
   const authTokenPermissions = useStore($authTokenPermissions);
+  const project = useStore($project);
   const isDeployEnabled = authTokenPermissions.canPublish;
 
   const tooltipContent = isDeployEnabled
@@ -49,6 +50,11 @@ export const DeployAndShareButton = ({ projectId }: DeployAndShareProps) => {
     : "Only the owner, an admin, or content editors with publish permissions can deploy projects";
 
   const handleDeployAndShare = async () => {
+    if (project === undefined) {
+      toast.error("Project not found");
+      return;
+    }
+
     try {
       setIsDeployingOptimistic(true);
       setDeploymentUrl(null);
@@ -61,7 +67,7 @@ export const DeployAndShareButton = ({ projectId }: DeployAndShareProps) => {
       try {
         publishResult = await nativeClient.domain.publish.mutate({
           projectId,
-          domains: [], // Use default domains
+          domains: [project.domain], // Include the project's domain so CLI sync can find the build
           destination: "saas",
         });
 
