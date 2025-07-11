@@ -28,11 +28,11 @@ import { nativeClient } from "~/shared/trpc/trpc-client";
 import { $authTokenPermissions, $project } from "~/shared/nano-states";
 import { builderUrl } from "~/shared/router-utils";
 
-type DeployAndShareProps = {
+type DeployProps = {
   projectId: string;
 };
 
-export const DeployAndShareButton = ({ projectId }: DeployAndShareProps) => {
+export const DeployButton = ({ projectId }: DeployProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeploying, setIsDeployingOptimistic] = useOptimistic(false);
   const [deploymentUrl, setDeploymentUrl] = useState<string | null>(null);
@@ -46,10 +46,10 @@ export const DeployAndShareButton = ({ projectId }: DeployAndShareProps) => {
   const isDeployEnabled = authTokenPermissions.canPublish;
 
   const tooltipContent = isDeployEnabled
-    ? "Create share URL and trigger GitHub Action (publish may be skipped if deployment service is not configured)"
+    ? "Deploy your latest changes via GitHub Actions"
     : "Only the owner, an admin, or content editors with publish permissions can deploy projects";
 
-  const handleDeployAndShare = async () => {
+  const handleDeploy = async () => {
     if (project === undefined) {
       toast.error("Project not found");
       return;
@@ -61,29 +61,7 @@ export const DeployAndShareButton = ({ projectId }: DeployAndShareProps) => {
       setShareUrl(null);
       setGithubActionStatus(null);
 
-      // Step 1: Publish the project (same as publish button)
-      // Note: This may fail if deployment service is not configured
-      let publishResult;
-      try {
-        publishResult = await nativeClient.domain.publish.mutate({
-          projectId,
-          domains: [project.domain], // Include the project's domain so CLI sync can find the build
-          destination: "saas",
-        });
-
-        if (publishResult.success === false) {
-          console.warn(
-            `Publish failed: ${publishResult.error} - continuing with share URL creation`
-          );
-          // Continue anyway - the share URL will still work
-        }
-      } catch (error) {
-        console.warn(
-          "Publish step failed, continuing with share URL creation:",
-          error
-        );
-        // Continue anyway - the share URL will still work
-      }
+      // Step 1: Skip publishing - GitHub Action works with development builds directly
 
       // Step 2: Create a share URL (same as share button)
       const shareResult = await nativeClient.authorizationToken.create.mutate({
@@ -111,17 +89,13 @@ export const DeployAndShareButton = ({ projectId }: DeployAndShareProps) => {
 
       if (githubActionResult.success) {
         setGithubActionStatus("success");
-        toast.success(
-          "Successfully deployed and shared! GitHub Action triggered."
-        );
+        toast.success("Successfully deployed! GitHub Action triggered.");
       } else {
         setGithubActionStatus("error");
         toast.error(`GitHub Action failed: ${githubActionResult.error}`);
       }
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Deploy and share failed"
-      );
+      toast.error(error instanceof Error ? error.message : "Deploy failed");
       setGithubActionStatus("error");
     } finally {
       setIsDeployingOptimistic(false);
@@ -171,7 +145,7 @@ export const DeployAndShareButton = ({ projectId }: DeployAndShareProps) => {
             color="gradient"
             prefix={<UploadIcon />}
           >
-            Deploy & Share
+            Deploy
           </Button>
         </PopoverTrigger>
       </Tooltip>
@@ -191,14 +165,13 @@ export const DeployAndShareButton = ({ projectId }: DeployAndShareProps) => {
             </PopoverTitleActions>
           }
         >
-          Deploy & Share
+          Deploy
         </PopoverTitle>
 
         <Grid columns={1} gap={3} css={{ padding: theme.panel.padding }}>
           <Text color="subtle">
-            This will attempt to publish your project, create a share link, and
-            trigger a GitHub Action. If the deployment service is not
-            configured, it will skip publishing and continue with the share URL.
+            This will create a share link and trigger a GitHub Action to deploy
+            your latest changes to Cloudflare Pages.
           </Text>
 
           {shareUrl && (
@@ -233,10 +206,10 @@ export const DeployAndShareButton = ({ projectId }: DeployAndShareProps) => {
             type="button"
             color="positive"
             state={isDeploying ? "pending" : undefined}
-            onClick={handleDeployAndShare}
+            onClick={handleDeploy}
             disabled={isDeploying}
           >
-            {isDeploying ? "Deploying..." : "Deploy & Share"}
+            {isDeploying ? "Deploying..." : "Deploy"}
           </Button>
         </Grid>
       </PopoverContent>
