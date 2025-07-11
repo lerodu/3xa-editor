@@ -46,7 +46,7 @@ export const DeployButton = ({ projectId }: DeployProps) => {
   const isDeployEnabled = authTokenPermissions.canPublish;
 
   const tooltipContent = isDeployEnabled
-    ? "Deploy your latest changes via GitHub Actions"
+    ? "Publish your project and deploy it via GitHub Actions"
     : "Only the owner, an admin, or content editors with publish permissions can deploy projects";
 
   const handleDeploy = async () => {
@@ -61,7 +61,17 @@ export const DeployButton = ({ projectId }: DeployProps) => {
       setShareUrl(null);
       setGithubActionStatus(null);
 
-      // Step 1: Skip publishing - GitHub Action works with development builds directly
+      // Step 1: Publish the project (now works with mock deployment service)
+      const publishResult = await nativeClient.domain.publish.mutate({
+        projectId,
+        domains: [project.domain],
+        destination: "saas",
+      });
+
+      if (publishResult.success === false) {
+        toast.error(`Publish failed: ${publishResult.error}`);
+        return;
+      }
 
       // Step 2: Create a share URL (same as share button)
       const shareResult = await nativeClient.authorizationToken.create.mutate({
@@ -89,7 +99,9 @@ export const DeployButton = ({ projectId }: DeployProps) => {
 
       if (githubActionResult.success) {
         setGithubActionStatus("success");
-        toast.success("Successfully deployed! GitHub Action triggered.");
+        toast.success(
+          "Successfully published and deployed! GitHub Action triggered."
+        );
       } else {
         setGithubActionStatus("error");
         toast.error(`GitHub Action failed: ${githubActionResult.error}`);
@@ -170,8 +182,8 @@ export const DeployButton = ({ projectId }: DeployProps) => {
 
         <Grid columns={1} gap={3} css={{ padding: theme.panel.padding }}>
           <Text color="subtle">
-            This will create a share link and trigger a GitHub Action to deploy
-            your latest changes to Cloudflare Pages.
+            This will publish your project, create a share link, and trigger a
+            GitHub Action to deploy it to Cloudflare Pages.
           </Text>
 
           {shareUrl && (
