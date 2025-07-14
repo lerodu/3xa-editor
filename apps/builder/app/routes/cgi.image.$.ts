@@ -106,22 +106,46 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   if (URL.canParse(name)) {
     return fetch(name);
   }
+
+  // Check if file exists locally first
   const filePath = join(process.cwd(), fileUploadPath, name);
 
-  if (existsSync(filePath) === false) {
-    throw new Response("Not found", {
-      status: 404,
-    });
+  if (existsSync(filePath)) {
+    const [contentType] = getImageNameAndType(name) ?? ["image/png"];
+
+    return new Response(
+      createReadableStreamFromReadable(createReadStream(filePath)),
+      {
+        headers: {
+          "content-type": contentType,
+        },
+      }
+    );
   }
 
-  const [contentType] = getImageNameAndType(name) ?? ["image/png"];
+  // If S3 is configured and file doesn't exist locally, try to fetch from S3
+  if (env.S3_ENDPOINT !== undefined && env.S3_BUCKET !== undefined) {
+    const s3Url = new URL(`/${env.S3_BUCKET}/${name}`, env.S3_ENDPOINT);
 
-  return new Response(
-    createReadableStreamFromReadable(createReadStream(filePath)),
-    {
-      headers: {
-        "content-type": contentType,
-      },
+    try {
+      const response = await fetch(s3Url.href);
+
+      if (response.ok) {
+        const [contentType] = getImageNameAndType(name) ?? ["image/png"];
+
+        return new Response(response.body, {
+          headers: {
+            "content-type": contentType,
+            "cache-control": "public, max-age=31536004,immutable",
+          },
+        });
+      }
+    } catch (error) {
+      console.error(`Failed to fetch from S3: ${s3Url.href}`, error);
     }
-  );
+  }
+
+  throw new Response("Not found", {
+    status: 404,
+  });
 };

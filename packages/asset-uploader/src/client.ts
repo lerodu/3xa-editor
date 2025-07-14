@@ -9,4 +9,5 @@ export type AssetClient = {
       | { width: number; height: number; format: string }
       | undefined
   ) => Promise<AssetData>;
+  deleteFile?: (name: string) => Promise<void>;
 };

@@ -4,6 +4,7 @@ import {
   AuthorizationError,
 } from "@webstudio-is/trpc-interface/index.server";
 import type { Asset } from "@webstudio-is/sdk";
+import { createAssetClient } from "./clients";
 
 export const deleteAssets = async (
   props: {
@@ -62,7 +63,19 @@ export const deleteAssets = async (
     unusedFileNames.delete(asset.name);
   }
 
-  // delete unused files
+  // delete unused files from storage (S3 or local filesystem)
+  const assetClient = createAssetClient();
+  if (assetClient.deleteFile) {
+    for (const fileName of unusedFileNames) {
+      try {
+        await assetClient.deleteFile(fileName);
+      } catch (error) {
+        console.error(`Failed to delete file ${fileName} from storage:`, error);
+      }
+    }
+  }
+
+  // delete unused files from database
   await context.postgrest.client
     .from("File")
     .update({ isDeleted: true })

@@ -2,6 +2,7 @@ import { Sha256 } from "@aws-crypto/sha256-js";
 import { SignatureV4 } from "@smithy/signature-v4";
 import type { AssetClient } from "../../client";
 import { uploadToS3 } from "./upload";
+import { deleteFromS3 } from "./delete";
 
 type S3ClientOptions = {
   endpoint: string;
@@ -45,7 +46,17 @@ export const createS3Client = (options: S3ClientOptions): AssetClient => {
     });
   };
 
+  const deleteFile: AssetClient["deleteFile"] = async (name) => {
+    return deleteFromS3({
+      signer,
+      name,
+      endpoint: options.endpoint,
+      bucket: options.bucket,
+    });
+  };
+
   return {
     uploadFile,
+    deleteFile,
   };
 };
