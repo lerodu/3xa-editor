@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Grid,
   findNextListItemIndex,
@@ -7,7 +7,6 @@ import {
   SearchField,
   Text,
   Flex,
-  Button,
 } from "@webstudio-is/design-system";
 import { PexelsThumbnail } from "./pexels-thumbnail";
 import type { PexelsPhoto, PexelsSearchResponse } from "./pexels-service";
@@ -21,6 +20,8 @@ const useLogic = ({ onChange }: { onChange?: (assetId: string) => void }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadingRef = useRef<HTMLDivElement | null>(null);
 
   const searchProps = useSearchFieldKeys({
     onMove({ direction }) {
@@ -63,7 +64,7 @@ const useLogic = ({ onChange }: { onChange?: (assetId: string) => void }) => {
         body: JSON.stringify({
           query: query.trim(),
           page,
-          perPage: 20,
+          perPage: 15, // Balanced amount for infinite scroll
         }),
       });
 
@@ -103,11 +104,44 @@ const useLogic = ({ onChange }: { onChange?: (assetId: string) => void }) => {
     }
   };
 
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
     if (hasMore && !isLoading && searchProps.value.trim()) {
       searchPexels(searchProps.value, currentPage + 1);
     }
-  };
+  }, [hasMore, isLoading, searchProps.value, currentPage]);
+
+  // Set up infinite scroll with intersection observer
+  useEffect(() => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadingRef.current) {
+      observerRef.current.observe(loadingRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [loadMore]);
+
+  // Reset observer when search changes
+  useEffect(() => {
+    if (observerRef.current && loadingRef.current) {
+      observerRef.current.observe(loadingRef.current);
+    }
+  }, [searchResults]);
 
   useEffect(() => {
     const delayedSearch = setTimeout(() => {
@@ -139,8 +173,8 @@ const useLogic = ({ onChange }: { onChange?: (assetId: string) => void }) => {
     isLoading,
     error,
     hasMore,
-    loadMore,
     totalResults,
+    loadingRef,
   };
 };
 
@@ -158,8 +192,8 @@ export const PexelsTab = ({ onChange }: PexelsTabProps) => {
     isLoading,
     error,
     hasMore,
-    loadMore,
     totalResults,
+    loadingRef,
   } = useLogic({ onChange });
 
   return (
@@ -169,6 +203,7 @@ export const PexelsTab = ({ onChange }: PexelsTabProps) => {
         overflow: "hidden",
         paddingBlock: theme.panel.paddingBlock,
         flex: 1,
+        minHeight: 0, // Allow shrinking in flex containers
       }}
     >
       <Flex
@@ -244,6 +279,7 @@ export const PexelsTab = ({ onChange }: PexelsTabProps) => {
         css={{
           flex: 1,
           overflow: "auto",
+          minHeight: 0, // Prevent flex item from growing beyond container
         }}
       >
         <Grid
@@ -252,6 +288,7 @@ export const PexelsTab = ({ onChange }: PexelsTabProps) => {
           css={{
             paddingInline: theme.panel.paddingInline,
             paddingBottom: theme.spacing[4],
+            minHeight: "fit-content", // Ensure grid maintains proper height
           }}
         >
           {searchResults.map((photo, index) => (
@@ -265,19 +302,38 @@ export const PexelsTab = ({ onChange }: PexelsTabProps) => {
           ))}
         </Grid>
 
+        {/* Infinite scroll loading indicator */}
         {hasMore && (
           <Flex
+            ref={loadingRef}
+            align="center"
             justify="center"
             css={{
               padding: theme.spacing[4],
+              color: theme.colors.foregroundMoreSubtle,
             }}
           >
-            <Button color="neutral" onClick={loadMore} disabled={isLoading}>
-              {isLoading ? "Loading..." : "Load More"}
-            </Button>
+            <Text variant="tiny">
+              {isLoading ? "Loading more images..." : "Scroll to load more"}
+            </Text>
           </Flex>
         )}
 
+        {/* No more results indicator */}
+        {searchResults.length > 0 && !hasMore && !isLoading && (
+          <Flex
+            align="center"
+            justify="center"
+            css={{
+              padding: theme.spacing[4],
+              color: theme.colors.foregroundMoreSubtle,
+            }}
+          >
+            <Text variant="tiny">No more results</Text>
+          </Flex>
+        )}
+
+        {/* Initial loading state */}
         {isLoading && searchResults.length === 0 && (
           <Flex
             align="center"

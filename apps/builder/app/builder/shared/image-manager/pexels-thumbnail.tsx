@@ -56,7 +56,7 @@ const ThumbnailContainer = styled(Box, {
 
 const Thumbnail = styled(Box, {
   width: "100%",
-  height: theme.spacing[19],
+  height: theme.spacing[21], // Increased from 19 (64px) to 21 (96px) for consistency
   flexShrink: 0,
   position: "relative",
   cursor: "pointer",

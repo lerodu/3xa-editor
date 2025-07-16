@@ -71,8 +71,8 @@ export const downloadAndUploadPexelsImage = async (
   try {
     onProgress?.(0);
 
-    // Use the medium size for better balance of quality and file size
-    const imageUrl = photo.src.medium;
+    // Use the large size for better quality
+    const imageUrl = photo.src.large;
 
     // Download the image
     const response = await fetch(imageUrl);

@@ -4,6 +4,7 @@ import {
   PanelTabsList,
   PanelTabsTrigger,
   PanelTabsContent,
+  toast,
 } from "@webstudio-is/design-system";
 import type { ImageAsset } from "@webstudio-is/sdk";
 import { ImageManager } from "./image-manager";
@@ -21,6 +22,19 @@ export const TabbedImageManager = ({
 }: TabbedImageManagerProps) => {
   const [activeTab, setActiveTab] = useState("uploads");
 
+  const handlePexelsUpload = (assetId: string) => {
+    // Show toast notification
+    toast.success("Image uploaded to your asset library!");
+
+    // Switch to uploads tab after a brief delay
+    setTimeout(() => {
+      setActiveTab("uploads");
+    }, 100);
+
+    // Call the original onChange handler
+    onChange?.(assetId);
+  };
+
   return (
     <PanelTabs
       value={activeTab}
@@ -29,6 +43,8 @@ export const TabbedImageManager = ({
         display: "flex",
         flexDirection: "column",
         height: "100%",
+        minHeight: 0, // Allow shrinking in flex containers
+        maxHeight: "70vh", // Reasonable max height for floating panels
       }}
     >
       <PanelTabsList>
@@ -43,6 +59,7 @@ export const TabbedImageManager = ({
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
+          minHeight: 0, // Allow shrinking in flex containers
         }}
       >
         <ImageManager accept={accept} onChange={onChange} />
@@ -55,9 +72,10 @@ export const TabbedImageManager = ({
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
+          minHeight: 0, // Allow shrinking in flex containers
         }}
       >
-        <PexelsTab onChange={onChange} />
+        <PexelsTab onChange={handlePexelsUpload} />
       </PanelTabsContent>
     </PanelTabs>
   );
