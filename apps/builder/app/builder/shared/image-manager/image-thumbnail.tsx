@@ -95,7 +95,7 @@ const ThumbnailContainer = styled(Box, {
 
 const Thumbnail = styled(Box, {
   width: "100%",
-  height: theme.spacing[21], // Increased from 19 (64px) to 21 (96px) for better visibility
+  height: theme.spacing[19],
   flexShrink: 0,
   position: "relative",
 });
@@ -160,8 +160,8 @@ export const ImageThumbnail = ({
                 : undefined
             }
             alt={description ?? name}
-            // width={192} used for Image optimizations - matches larger container size and high DPI
-            width={192}
+            // width={64} used for Image optimizations it should be approximately equal to the width of the picture on the screen in px
+            width={64}
           />
         )}
       </Thumbnail>

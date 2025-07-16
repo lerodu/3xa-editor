@@ -84,7 +84,6 @@ const CloneProjectView = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogTitle>Clone Project</DialogTitle>
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -125,6 +124,7 @@ const CloneProjectView = ({
             </DialogClose>
           </DialogActions>
         </form>
+        <DialogTitle>Clone Project</DialogTitle>
       </DialogContent>
     </Dialog>
   );

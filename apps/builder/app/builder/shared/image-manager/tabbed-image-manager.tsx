@@ -7,7 +7,7 @@ import {
   toast,
 } from "@webstudio-is/design-system";
 import type { ImageAsset } from "@webstudio-is/sdk";
-import { ImageManager } from "./image-manager";
+import { OriginalImageManager } from "./image-manager";
 import { PexelsTab } from "./pexels-tab";
 
 type TabbedImageManagerProps = {
@@ -62,7 +62,7 @@ export const TabbedImageManager = ({
           minHeight: 0, // Allow shrinking in flex containers
         }}
       >
-        <ImageManager accept={accept} onChange={onChange} />
+        <OriginalImageManager accept={accept} onChange={onChange} />
       </PanelTabsContent>
 
       <PanelTabsContent

@@ -53,7 +53,6 @@ export const ProjectSettingsView = ({
           height: theme.spacing[35],
         }}
       >
-        <DialogTitle>Project Settings</DialogTitle>
         <fieldset style={{ display: "contents" }} disabled={!isDesignMode}>
           <Flex grow>
             <List asChild>
@@ -111,6 +110,10 @@ export const ProjectSettingsView = ({
               </Grid>
             </ScrollArea>
           </Flex>
+          {/* Title is at the end intentionally,
+           * to make the close button last in the tab order
+           */}
+          <DialogTitle>Project Settings</DialogTitle>
         </fieldset>
       </DialogContent>
     </Dialog>
