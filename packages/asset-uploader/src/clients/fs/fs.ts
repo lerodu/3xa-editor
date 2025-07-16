@@ -13,7 +13,7 @@ export const createFsClient = (options: FsClientOptions): AssetClient => {
     name,
     type,
     data,
-    assetInfoFallback
+    _assetInfoFallback
   ) => {
     return uploadToFs({
       name,

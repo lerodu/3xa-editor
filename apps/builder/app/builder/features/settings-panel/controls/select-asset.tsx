@@ -4,11 +4,11 @@ import { useStore } from "@nanostores/react";
 import { Button, Flex, Text, FloatingPanel } from "@webstudio-is/design-system";
 import type { Prop } from "@webstudio-is/sdk";
 import { $assets } from "~/shared/nano-states";
-import { ImageManager } from "~/builder/shared/image-manager";
+import { TabbedImageManager } from "~/builder/shared/image-manager";
 import { type ControlProps } from "../shared";
 import { acceptToMimeCategories } from "@webstudio-is/asset-uploader";
 
-// tests whether we can use ImageManager for the given "accept" value
+// tests whether we can use TabbedImageManager for the given "accept" value
 const isImageAccept = (accept?: string) => {
   const acceptCategories = acceptToMimeCategories(accept || "");
   return (
@@ -45,7 +45,7 @@ export const SelectAsset = ({ prop, onChange, accept }: Props) => {
       <FloatingPanel
         title="Images"
         content={
-          <ImageManager
+          <TabbedImageManager
             onChange={(assetId) => onChange({ type: "asset", value: assetId })}
             accept={accept}
           />

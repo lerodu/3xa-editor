@@ -8,7 +8,7 @@ import {
 } from "@webstudio-is/design-system";
 import type { CssProperty, InvalidValue } from "@webstudio-is/css-engine";
 import { $assets } from "~/shared/nano-states";
-import { ImageManager } from "~/builder/shared/image-manager";
+import { TabbedImageManager } from "~/builder/shared/image-manager";
 import { useComputedStyleDecl } from "../../shared/model";
 import {
   getRepeatedStyleItem,
@@ -101,7 +101,7 @@ export const ImageControl = ({
       <FloatingPanel
         title="Images"
         content={
-          <ImageManager
+          <TabbedImageManager
             onChange={(assetId) => {
               setRepeatedStyleItem(styleDecl, index, {
                 type: "image",

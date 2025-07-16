@@ -64,3 +64,4 @@ packages/prisma-client/src/__generated__
 
 .temp
 *.timestamp-*.mjs
+.claude

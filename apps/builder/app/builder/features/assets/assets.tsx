@@ -5,7 +5,7 @@ import {
   Tooltip,
 } from "@webstudio-is/design-system";
 import { XIcon } from "@webstudio-is/icons";
-import { ImageManager } from "~/builder/shared/image-manager";
+import { TabbedImageManager } from "~/builder/shared/image-manager";
 
 export const AssetsPanel = ({ onClose }: { onClose: () => void }) => {
   return (
@@ -25,7 +25,7 @@ export const AssetsPanel = ({ onClose }: { onClose: () => void }) => {
         Assets
       </PanelTitle>
       <Separator />
-      <ImageManager />
+      <TabbedImageManager />
     </>
   );
 };

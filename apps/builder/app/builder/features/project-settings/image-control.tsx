@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { FloatingPanel } from "@webstudio-is/design-system";
-import { ImageManager } from "~/builder/shared/image-manager";
+import { TabbedImageManager } from "~/builder/shared/image-manager";
 
 // @todo should be moved to shared as its being reused in another feature
 export const ImageControl = (props: {
@@ -11,7 +11,7 @@ export const ImageControl = (props: {
     <FloatingPanel
       title="Images"
       content={
-        <ImageManager
+        <TabbedImageManager
           onChange={(assetId) => {
             props.onAssetIdChange(assetId);
           }}

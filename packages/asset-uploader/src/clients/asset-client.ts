@@ -1,7 +1,8 @@
+import type { AssetClient } from "../client";
 import { createFsClient } from "./fs/fs";
 import { createS3Client } from "./s3/s3";
 
-export const createAssetClient = () => {
+export const createAssetClient = (): AssetClient => {
   // Check if S3 is configured
   if (
     process.env.S3_ENDPOINT !== undefined &&
@@ -17,11 +18,11 @@ export const createAssetClient = () => {
       secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
       bucket: process.env.S3_BUCKET,
       acl: process.env.S3_ACL,
-      maxUploadSize: parseInt(process.env.MAX_UPLOAD_SIZE || "10485760"), // 10MB default
+      maxUploadSize: parseInt(process.env.MAX_UPLOAD_SIZE || "10485760", 10), // 10MB default
     });
   } else {
     return createFsClient({
-      maxUploadSize: parseInt(process.env.MAX_UPLOAD_SIZE || "10485760"), // 10MB default
+      maxUploadSize: parseInt(process.env.MAX_UPLOAD_SIZE || "10485760", 10), // 10MB default
       fileDirectory: process.env.FILE_DIRECTORY || "public/cgi/asset",
     });
   }
